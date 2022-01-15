@@ -6,12 +6,9 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract DummyERC20 is ERC20, Ownable {
     constructor(
-        string memory name,
-        string memory symbol,
-        address initialAccount,
         uint256 initialBalance
-    ) payable ERC20(name, symbol) {
-        _mint(initialAccount, initialBalance);
+    ) ERC20("DummyERC20", "PGL") {
+        _mint(msg.sender, initialBalance);
     }
 
     function mint(address account, uint256 amount) external onlyOwner {
