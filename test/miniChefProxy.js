@@ -24,7 +24,7 @@ describe("MiniChef Proxy", function () {
     );
     await this.chef.fundRewards(
       ethers.utils.parseUnits("538000000", 18),
-      538*86400
+      538*86400 // funding duration
     );
 
     // Deploy DummyERC20 and mint 10 tokens to the deployer
@@ -67,6 +67,58 @@ describe("MiniChef Proxy", function () {
   });
   it("diverts rewards to geyser", async function () {
     await network.provider.send("evm_increaseTime", [86400])
-    await this.proxy.harvest();
+    await expect(this.proxy.harvest()).to.emit(this.proxy, "RewardsHarvested");
+    await expect(this.png.balanceOf(this.geyser.address)).to.not.equal(0);
+  });
+  it("changes admin", async function() {
+    var admin;
+    var proxy = await this.proxy.connect(this.multisig);
+    await expect(proxy.changeAdmin(this.deployer.address))
+      .to.emit(proxy, "AdminChanged");
+    admin = await this.proxy.admin();
+    expect(admin).to.equal(this.deployer.address);
+    proxy = await this.proxy.connect(this.deployer);
+    await expect(proxy.changeAdmin(this.multisig.address))
+      .to.emit(proxy, "AdminChanged");
+    admin = await this.proxy.admin();
+    expect(admin).to.equal(this.multisig.address);
+  });
+  it("changes recipient", async function() {
+    var recipient;
+    var proxy = await this.proxy.connect(this.multisig);
+    await expect(proxy.changeRecipient(this.deployer.address))
+      .to.emit(proxy, "RecipientChanged");
+    recipient = await this.proxy.recipient();
+    expect(recipient).to.equal(this.deployer.address);
+    await expect(proxy.changeRecipient(this.geyser.address))
+      .to.emit(proxy, "RecipientChanged");
+    recipient = await this.proxy.recipient();
+    expect(recipient).to.equal(this.geyser.address);
+  });
+  it("changes minichef", async function() {
+    var minichef;
+    var pid;
+    var proxy = await this.proxy.connect(this.multisig);
+    await expect(proxy.changeChef(this.deployer.address,1))
+      .to.emit(proxy, "ChefChanged");
+    chef = await this.proxy.chef();
+    pid = await this.proxy.pid();
+    expect(chef).to.equal(this.deployer.address);
+    expect(pid).to.equal(1);
+    await expect(proxy.changeChef(this.chef.address,0))
+      .to.emit(proxy, "ChefChanged");
+    chef = await this.proxy.chef();
+    pid = await this.proxy.pid();
+    expect(chef).to.equal(this.chef.address);
+    expect(pid).to.equal(0);
+  });
+  it("unpriveledged cannot change variables", async function() {
+    proxy = await this.proxy.connect(this.deployer);
+    await expect(proxy.changeRecipient(this.deployer.address))
+      .to.be.revertedWith("sender not admin");
+    await expect(proxy.changeAdmin(this.deployer.address))
+      .to.be.revertedWith("sender not admin");
+    await expect(proxy.changeChef(this.deployer.address,0))
+      .to.be.revertedWith("sender not admin");
   });
 });
