@@ -16,3 +16,7 @@ Below is the instructions to trustlessly set this up with minimal multisig trans
 7. Multisig confirms the recipient is correctly set in MiniChefProxy
 8. Multisig deposits 10 DummyERC20 tokens to MiniChefV2 with `deposit()` function
 	* Inserts MiniChefProxy address for the `to` parameter
+
+### Additional Considerations
+
+The pool ID should be blacklisted on DEX UI to not confuse the users.
