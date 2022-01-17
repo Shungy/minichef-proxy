@@ -113,12 +113,20 @@ describe("MiniChef Proxy", function () {
     expect(pid).to.equal(0);
   });
   it("unpriveledged cannot change variables", async function() {
-    proxy = await this.proxy.connect(this.deployer);
+    var proxy = await this.proxy.connect(this.deployer);
     await expect(proxy.changeRecipient(this.deployer.address))
       .to.be.revertedWith("sender not admin");
     await expect(proxy.changeAdmin(this.deployer.address))
       .to.be.revertedWith("sender not admin");
     await expect(proxy.changeChef(this.deployer.address,0))
       .to.be.revertedWith("sender not admin");
+  });
+  it("withdraws and burns", async function() {
+    var proxy = await this.proxy.connect(this.multisig);
+    var balance = (await this.chef.userInfo(0,proxy.address)).amount;
+    await expect(proxy.withdraw(balance))
+      .to.emit(proxy, "Harvest").and.to.emit(proxy, "Withdraw");
+    balance = (await this.chef.userInfo(0,proxy.address)).amount;
+    expect(balance).to.equal(0);
   });
 });
