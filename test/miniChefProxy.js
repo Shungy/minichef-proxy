@@ -67,19 +67,19 @@ describe("MiniChef Proxy", function () {
   });
   it("diverts rewards to geyser", async function () {
     await network.provider.send("evm_increaseTime", [86400])
-    await expect(this.proxy.harvest()).to.emit(this.proxy, "RewardsHarvested");
+    await expect(this.proxy.harvest()).to.emit(this.proxy, "Harvest");
     await expect(this.png.balanceOf(this.geyser.address)).to.not.equal(0);
   });
   it("changes admin", async function() {
     var admin;
     var proxy = await this.proxy.connect(this.multisig);
     await expect(proxy.changeAdmin(this.deployer.address))
-      .to.emit(proxy, "AdminChanged");
+      .to.emit(proxy, "NewAdmin");
     admin = await this.proxy.admin();
     expect(admin).to.equal(this.deployer.address);
     proxy = await this.proxy.connect(this.deployer);
     await expect(proxy.changeAdmin(this.multisig.address))
-      .to.emit(proxy, "AdminChanged");
+      .to.emit(proxy, "NewAdmin");
     admin = await this.proxy.admin();
     expect(admin).to.equal(this.multisig.address);
   });
@@ -87,11 +87,11 @@ describe("MiniChef Proxy", function () {
     var recipient;
     var proxy = await this.proxy.connect(this.multisig);
     await expect(proxy.changeRecipient(this.deployer.address))
-      .to.emit(proxy, "RecipientChanged");
+      .to.emit(proxy, "NewRecipient");
     recipient = await this.proxy.recipient();
     expect(recipient).to.equal(this.deployer.address);
     await expect(proxy.changeRecipient(this.geyser.address))
-      .to.emit(proxy, "RecipientChanged");
+      .to.emit(proxy, "NewRecipient");
     recipient = await this.proxy.recipient();
     expect(recipient).to.equal(this.geyser.address);
   });
@@ -100,13 +100,13 @@ describe("MiniChef Proxy", function () {
     var pid;
     var proxy = await this.proxy.connect(this.multisig);
     await expect(proxy.changeChef(this.deployer.address,1))
-      .to.emit(proxy, "ChefChanged");
+      .to.emit(proxy, "NewChef");
     chef = await this.proxy.chef();
     pid = await this.proxy.pid();
     expect(chef).to.equal(this.deployer.address);
     expect(pid).to.equal(1);
     await expect(proxy.changeChef(this.chef.address,0))
-      .to.emit(proxy, "ChefChanged");
+      .to.emit(proxy, "NewChef");
     chef = await this.proxy.chef();
     pid = await this.proxy.pid();
     expect(chef).to.equal(this.chef.address);
