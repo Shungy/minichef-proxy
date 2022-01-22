@@ -114,7 +114,10 @@ describe("MiniChef Proxy", function () {
   });
   it("unpriveledged cannot change variables", async function() {
     var proxy = await this.proxy.connect(this.deployer);
+    var balance = (await this.chef.userInfo(0,proxy.address)).amount;
     await expect(proxy.changeRecipient(this.deployer.address))
+      .to.be.revertedWith("unpriviledged message sender");
+    await expect(proxy.harvestAndWithdraw(balance))
       .to.be.revertedWith("unpriviledged message sender");
     await expect(proxy.changeAdmin(this.deployer.address))
       .to.be.revertedWith("unpriviledged message sender");

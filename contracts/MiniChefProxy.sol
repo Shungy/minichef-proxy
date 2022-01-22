@@ -50,7 +50,7 @@ contract MiniChefProxy {
 
     /// @notice harvest & withdraw & burn tokens to reduce or end rewards
     /// @param amount - amount of deposited tokens to withdraw
-    function harvestAndWithdraw(uint amount) public onlyAdmin {
+    function harvestAndWithdraw(uint amount) public {
         harvest();
         withdraw(amount);
     }
@@ -69,10 +69,7 @@ contract MiniChefProxy {
     /// @notice harvest then change chef address and pid.
     /// @param newChef - address of the MiniChef contract
     /// @param newPid - pool id of the deposit token
-    function harvestAndChangeChef(address newChef, uint newPid)
-        public
-        onlyAdmin
-    {
+    function harvestAndChangeChef(address newChef, uint newPid) public {
         harvest();
         changeChef(newChef, newPid);
     }
