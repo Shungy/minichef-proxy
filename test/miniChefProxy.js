@@ -99,8 +99,8 @@ describe("MiniChef Proxy", function () {
     var minichef;
     var pid;
     var proxy = await this.proxy.connect(this.multisig);
-    await expect(proxy.changeChef(this.deployer.address,1))
-      .to.emit(proxy, "NewChef");
+    await expect(proxy.harvestAndChangeChef(this.deployer.address,1))
+      .to.emit(proxy, "Harvest").and.to.emit(proxy, "NewChef");
     chef = await this.proxy.chef();
     pid = await this.proxy.pid();
     expect(chef).to.equal(this.deployer.address);
@@ -115,16 +115,16 @@ describe("MiniChef Proxy", function () {
   it("unpriveledged cannot change variables", async function() {
     var proxy = await this.proxy.connect(this.deployer);
     await expect(proxy.changeRecipient(this.deployer.address))
-      .to.be.revertedWith("sender not admin");
+      .to.be.revertedWith("unpriviledged message sender");
     await expect(proxy.changeAdmin(this.deployer.address))
-      .to.be.revertedWith("sender not admin");
-    await expect(proxy.changeChef(this.deployer.address,0))
-      .to.be.revertedWith("sender not admin");
+      .to.be.revertedWith("unpriviledged message sender");
+    await expect(proxy.harvestAndChangeChef(this.deployer.address,0))
+      .to.be.revertedWith("unpriviledged message sender");
   });
   it("withdraws and burns", async function() {
     var proxy = await this.proxy.connect(this.multisig);
     var balance = (await this.chef.userInfo(0,proxy.address)).amount;
-    await expect(proxy.withdraw(balance))
+    await expect(proxy.harvestAndWithdraw(balance))
       .to.emit(proxy, "Harvest").and.to.emit(proxy, "Withdraw");
     balance = (await this.chef.userInfo(0,proxy.address)).amount;
     expect(balance).to.equal(0);
