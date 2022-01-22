@@ -119,9 +119,13 @@ describe("MiniChef Proxy", function () {
       .to.be.revertedWith("unpriviledged message sender");
     await expect(proxy.harvestAndWithdraw(balance))
       .to.be.revertedWith("unpriviledged message sender");
+    await expect(proxy.withdraw(balance))
+      .to.be.revertedWith("unpriviledged message sender");
     await expect(proxy.changeAdmin(this.deployer.address))
       .to.be.revertedWith("unpriviledged message sender");
     await expect(proxy.harvestAndChangeChef(this.deployer.address,0))
+      .to.be.revertedWith("unpriviledged message sender");
+    await expect(proxy.changeChef(this.deployer.address,0))
       .to.be.revertedWith("unpriviledged message sender");
   });
   it("withdraws and burns", async function() {
