@@ -42,7 +42,7 @@ contract MiniChefProxy {
 
     /// @notice withdraw & burn tokens to reduce or end rewards
     /// @param amount - amount of deposited tokens to withdraw
-    function withdraw(uint amount) public onlyAdmin(msg.sender) {
+    function withdraw(uint amount) public onlyAdmin {
         require(amount != 0, "invalid withdraw amount");
         IMiniChef(chef).withdraw(pid, amount, BURN_ADDRESS);
         emit Withdraw(amount);
@@ -50,7 +50,7 @@ contract MiniChefProxy {
 
     /// @notice harvest & withdraw & burn tokens to reduce or end rewards
     /// @param amount - amount of deposited tokens to withdraw
-    function harvestAndWithdraw(uint amount) public onlyAdmin(msg.sender) {
+    function harvestAndWithdraw(uint amount) public onlyAdmin {
         harvest();
         withdraw(amount);
     }
@@ -59,10 +59,7 @@ contract MiniChefProxy {
     /// pending rewards in a previous pool unharvestable
     /// @param newChef - address of the MiniChef contract
     /// @param newPid - pool id of the deposit token
-    function changeChef(address newChef, uint newPid)
-        public
-        onlyAdmin(msg.sender)
-    {
+    function changeChef(address newChef, uint newPid) public onlyAdmin {
         require(newChef != address(0), "invalid new chef address");
         chef = newChef;
         pid = newPid;
@@ -74,7 +71,7 @@ contract MiniChefProxy {
     /// @param newPid - pool id of the deposit token
     function harvestAndChangeChef(address newChef, uint newPid)
         public
-        onlyAdmin(msg.sender)
+        onlyAdmin
     {
         harvest();
         changeChef(newChef, newPid);
@@ -82,10 +79,7 @@ contract MiniChefProxy {
 
     /// @notice change who will receive the reward tokens
     /// @param newRecipient - address of the new recipient
-    function changeRecipient(address newRecipient)
-        public
-        onlyAdmin(msg.sender)
-    {
+    function changeRecipient(address newRecipient) public onlyAdmin {
         require(newRecipient != address(0), "invalid new recipient address");
         recipient = newRecipient;
         emit NewRecipient(recipient);
@@ -93,14 +87,14 @@ contract MiniChefProxy {
 
     /// @notice change contract administrator
     /// @param newAdmin - address of the new contract administrator/owner
-    function changeAdmin(address newAdmin) public onlyAdmin(msg.sender) {
+    function changeAdmin(address newAdmin) public onlyAdmin {
         require(newAdmin != address(0), "invalid new admin address");
         admin = newAdmin;
         emit NewAdmin(admin);
     }
 
-    modifier onlyAdmin(address sender) {
-        require(sender == admin, "unpriviledged message sender");
+    modifier onlyAdmin() {
+        require(msg.sender == admin, "unpriviledged message sender");
         _;
     }
 
